@@ -160,11 +160,16 @@ void MeshDifference::saveHeatmapMesh(const std::string &filename,
     // Map to color and push to the pointcloud.
     const tinycolormap::Color color =
         tinycolormap::GetColor(scaledDistance, colormap);
-    heatmapPCPtr->push_back(
-        pcl::PointXYZRGB(position(0), position(1), position(2),
-                         static_cast<uint8_t>(color.r() * 255.0),
-                         static_cast<uint8_t>(color.g() * 255.0),
-                         static_cast<uint8_t>(color.b() * 255.0)));
+
+    pcl::PointXYZRGB colouredPoint;
+    colouredPoint.x = position(0);
+    colouredPoint.y = position(1);
+    colouredPoint.z = position(2);
+    colouredPoint.r = static_cast<uint8_t>(color.r() * 255.0);
+    colouredPoint.g = static_cast<uint8_t>(color.g() * 255.0);
+    colouredPoint.b = static_cast<uint8_t>(color.b() * 255.0);
+
+    heatmapPCPtr->push_back(colouredPoint);
   }
 
   // Save to disk.
