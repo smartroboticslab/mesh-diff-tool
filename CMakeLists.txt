@@ -12,7 +12,7 @@ else()
 	message(WARNING "OpenMP not found. Performance may be terrible.")
 endif()
 
-find_package(PCL 1.5 REQUIRED)
+find_package(PCL 1.10 REQUIRED)
 
 include_directories(${PCL_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR})
 link_directories(${PCL_LIBRARY_DIRS})
