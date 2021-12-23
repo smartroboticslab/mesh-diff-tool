@@ -173,5 +173,6 @@ void MeshDifference::saveHeatmapMesh(const std::string &filename,
   }
 
   // Save to disk.
-  pcl::io::savePLYFile(filename, *heatmapPCPtr, false);
+  const bool export_binary = true;
+  pcl::io::savePLYFile(filename, *heatmapPCPtr, export_binary);
 }

@@ -71,6 +71,7 @@ int main(int argc, char **argv) {
   // Pairs to be compared.
   std::set<std::string> lookup;
   MeshDifference meshDifference(1000000.0);
+
   for (const auto &sourceMeshData : sourceDataVec) {
     // Locate the target Mesh based on the centroid distance.
     const auto targetMeshDataIt = std::min_element(
@@ -92,7 +93,7 @@ int main(int argc, char **argv) {
         (sourceMeshData.centroid - targetMeshDataIt->centroid).norm();
 
     // Print Matches
-    std::cout << "Source " << sourceMeshData.name << " matched with target "
+    std::cout << "Source " << sourceMeshData.name << " matched to target "
               << targetMeshDataIt->name << std::endl;
 
     // Compute the Mesh diff
