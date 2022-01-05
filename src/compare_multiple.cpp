@@ -4,13 +4,14 @@
 #include <pcl/common/centroid.h>
 
 struct MeshData {
+    std::filesystem::path filename;
     std::string name;
     pcl::PolygonMesh mesh;
     Eigen::Vector3d centroid;
 
-    MeshData(const std::filesystem::path& path) : name(path.filename().string())
+    MeshData(const std::filesystem::path& path) : filename(path), name(path.filename().string())
     {
-        pcl::io::loadPolygonFilePLY(path.string(), mesh);
+        pcl::io::loadPolygonFilePLY(filename.string(), mesh);
         centroid = computeCentroid(mesh);
     };
 
@@ -113,8 +114,8 @@ int main(int argc, char** argv)
         const float completness = 0.0f;
 
         // Show the results as TSV.
-        std::cout << sourceMeshData.name << "\t" << targetMeshDataIt->name << "\t" << accuracy
-                  << "\t" << completness << "\n";
+        std::cout << sourceMeshData.filename.string() << "\t" << targetMeshDataIt->filename.string()
+                  << "\t" << accuracy << "\t" << completness << "\n";
 
         // Save PC heatmap as a .ply
         const std::string heatmapFilename = outputPath
