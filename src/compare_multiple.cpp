@@ -108,9 +108,8 @@ int main(int argc, char** argv)
         // Compute the Mesh diff
         meshDifference.setSourceMesh(sourceMeshData.mesh);
         meshDifference.setTargetMesh(targetMeshDataIt->mesh);
-        meshDifference.computeDifference();
+        const float accuracy = meshDifference.computeDifference();
 
-        const float accuracy = 0.0f;
         const float completness = 0.0f;
 
         // Show the results as TSV.

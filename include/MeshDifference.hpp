@@ -69,10 +69,11 @@ class MeshDifference {
     };
 
     /**
-   * @brief      Calculates the difference between the source and the target
-   * mesh.
+   * @brief  Calculates the difference between the source and the target mesh and returns the RMSE
+   * error.
+   * @return The RMSE error in metres.
    */
-    void computeDifference();
+    float computeDifference();
 
     /**
    * @brief      Saves the difference as a heatmap PC.
@@ -143,6 +144,8 @@ class MeshDifference {
                                std::default_random_engine& generator,
                                std::uniform_real_distribution<double>& distribution,
                                Eigen::Vector3d& p);
+
+    double rmse() const;
 
     const double samplingDensity_;      ///< Sampling density in points per m^2
     DistanceDataVector meshDifference_; ///< PC containing the distance Info between the sampled

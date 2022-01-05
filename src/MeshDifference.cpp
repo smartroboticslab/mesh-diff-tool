@@ -59,11 +59,11 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr MeshDifference::sampleSurfaceMesh(const pcl:
     return sampledPCPtr;
 }
 
-void MeshDifference::computeDifference()
+float MeshDifference::computeDifference()
 {
     // Make sure the source and target Meshes are not empty.
     if (sourceMesh_.polygons.empty() || targetMesh_.polygons.empty())
-        return;
+        return NAN;
 
     // Reset the mesh difference vector.
     meshDifference_.clear();
@@ -92,6 +92,8 @@ void MeshDifference::computeDifference()
         // Push result
         meshDifference_.push_back(PointDistanceData(p, minDistance));
     }
+
+    return rmse();
 }
 
 double MeshDifference::computeTotalArea(const vtkSmartPointer<vtkPolyData> polygonDataPtr)
@@ -133,6 +135,15 @@ void MeshDifference::sampleTriangleSurface(const Eigen::Vector3d p0,
     const double alpha = distribution(generator);
     const double beta = distribution(generator);
     p = p0 + alpha * (p1 - p0) + beta * (p2 - p1);
+}
+
+double MeshDifference::rmse() const
+{
+    double sum_squares = 0.0;
+    for (const auto& d : meshDifference_) {
+        sum_squares += d.distance * d.distance;
+    }
+    return std::sqrt(sum_squares / meshDifference_.size());
 }
 
 void MeshDifference::saveHeatmapMesh(const std::string& filename,
