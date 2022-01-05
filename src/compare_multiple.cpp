@@ -61,7 +61,7 @@ int main(int argc, char** argv)
     MeshDataVector sourceDataVec;
     for (const auto& entry : std::filesystem::directory_iterator(sourcePath)) {
         if (validFilename(entry.path())) {
-            sourceDataVec.push_back(MeshData(entry.path()));
+            sourceDataVec.emplace_back(entry.path());
         }
     }
 
@@ -69,7 +69,7 @@ int main(int argc, char** argv)
     MeshDataVector targetDataVec;
     for (const auto& entry : std::filesystem::directory_iterator(targetPath)) {
         if (validFilename(entry.path())) {
-            targetDataVec.push_back(MeshData(entry.path()));
+            targetDataVec.emplace_back(entry.path());
         }
     }
 
