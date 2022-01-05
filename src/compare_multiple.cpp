@@ -117,7 +117,7 @@ int main(int argc, char** argv)
                   << "\t" << accuracy << "\t" << completness << "\n";
 
         // Save PC heatmap as a .ply
-        const std::string heatmapFilename = outputPath
+        const std::string heatmapFilename = outputPath + "/"
             + std::string(sourceMeshData.name.begin(), sourceMeshData.name.end() - 4)
             + "_heatmap.ply";
 
