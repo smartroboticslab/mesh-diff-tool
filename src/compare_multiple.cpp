@@ -30,6 +30,15 @@ typedef std::vector<MeshData, Eigen::aligned_allocator<MeshData>> MeshDataVector
 
 
 
+bool validFilename(const std::filesystem::path& path)
+{
+    const std::string s = path;
+    const std::string suffix = "_heatmap.ply";
+    return path.extension() == ".ply" && s.substr(s.size() - suffix.size()) != suffix;
+}
+
+
+
 void usage(const char* program_name)
 {
     std::cout << "Usage: " << program_name << " MESH_DIR GT_MESH_DIR [HEATMAP_DIR]\n";
@@ -51,13 +60,17 @@ int main(int argc, char** argv)
     // Iterate source Path
     MeshDataVector sourceDataVec;
     for (const auto& entry : std::filesystem::directory_iterator(sourcePath)) {
-        sourceDataVec.push_back(MeshData(entry.path()));
+        if (validFilename(entry.path())) {
+            sourceDataVec.push_back(MeshData(entry.path()));
+        }
     }
 
     // Iterate target Path
     MeshDataVector targetDataVec;
     for (const auto& entry : std::filesystem::directory_iterator(targetPath)) {
-        targetDataVec.push_back(MeshData(entry.path()));
+        if (validFilename(entry.path())) {
+            targetDataVec.push_back(MeshData(entry.path()));
+        }
     }
 
     // Pairs to be compared.
