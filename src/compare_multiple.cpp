@@ -1,4 +1,5 @@
 #include <MeshDifference.hpp>
+#include <algorithm>
 #include <filesystem>
 #include <pcl/common/centroid.h>
 
@@ -27,6 +28,11 @@ struct MeshData {
 };
 
 typedef std::vector<MeshData, Eigen::aligned_allocator<MeshData>> MeshDataVector;
+
+bool operator<(const MeshData& lhs, const MeshData& rhs)
+{
+    return lhs.name < rhs.name;
+}
 
 
 
@@ -64,6 +70,7 @@ int main(int argc, char** argv)
             sourceDataVec.emplace_back(entry.path());
         }
     }
+    std::sort(sourceDataVec.begin(), sourceDataVec.end());
 
     // Iterate target Path
     MeshDataVector targetDataVec;
@@ -72,6 +79,7 @@ int main(int argc, char** argv)
             targetDataVec.emplace_back(entry.path());
         }
     }
+    std::sort(targetDataVec.begin(), targetDataVec.end());
 
     // Pairs to be compared.
     std::set<std::string> lookup;
