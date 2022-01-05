@@ -98,7 +98,7 @@ int main(int argc, char** argv)
 
         // Check for matches to the same Mesh
         if (lookup.count(targetMeshDataIt->name)) {
-            // ToDo -> output a warning.
+            std::cerr << "Warning: duplicate object match to " << targetMeshDataIt->name << "\n";
         }
         else {
             lookup.insert(targetMeshDataIt->name);
