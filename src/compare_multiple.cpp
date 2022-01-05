@@ -28,8 +28,21 @@ Eigen::Vector3d computeCentroid(const pcl::PolygonMesh& mesh)
     return centroid_h.head<3>();
 }
 
+
+
+void usage(const char* program_name)
+{
+    std::cout << "Usage: " << program_name << " MESH_DIR GT_MESH_DIR [HEATMAP_DIR]\n";
+}
+
+
+
 int main(int argc, char** argv)
 {
+    if (argc != 3 && argc != 4) {
+        usage(argv[0]);
+        return 2;
+    }
     const std::string sourcePath(argv[1]);
     const std::string targetPath(argv[2]);
 
