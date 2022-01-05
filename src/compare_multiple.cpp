@@ -104,9 +104,6 @@ int main(int argc, char** argv)
             lookup.insert(targetMeshDataIt->name);
         }
 
-        // Compute Euclidean distance between centroids
-        const double centroidError = (sourceMeshData.centroid - targetMeshDataIt->centroid).norm();
-
         // Compute the Mesh diff
         meshDifference.setSourceMesh(sourceMeshData.mesh);
         meshDifference.setTargetMesh(targetMeshDataIt->mesh);
