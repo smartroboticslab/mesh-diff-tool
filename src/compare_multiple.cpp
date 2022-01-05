@@ -113,5 +113,5 @@ int main(int argc, char** argv)
         meshDifference.saveHeatmapMesh(heatmapFilename, minDistance, maxDistance, colormap);
     }
 
-    return 1;
+    return 0;
 }
