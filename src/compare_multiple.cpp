@@ -81,10 +81,11 @@ int main(int argc, char** argv)
     }
     std::sort(targetDataVec.begin(), targetDataVec.end());
 
+    // Print the TSV header.
+    std::cout << "Detected object\tGround truth object\tAccuracy (m)\tCompleteness (%)\n";
     // Pairs to be compared.
     std::set<std::string> lookup;
     MeshDifference meshDifference(1000000.0);
-
     for (const auto& sourceMeshData : sourceDataVec) {
         // Locate the target Mesh based on the centroid distance.
         const auto targetMeshDataIt =
@@ -106,14 +107,17 @@ int main(int argc, char** argv)
         // Compute Euclidean distance between centroids
         const double centroidError = (sourceMeshData.centroid - targetMeshDataIt->centroid).norm();
 
-        // Print Matches
-        std::cout << "Source " << sourceMeshData.name << " matched to target "
-                  << targetMeshDataIt->name << std::endl;
-
         // Compute the Mesh diff
         meshDifference.setSourceMesh(sourceMeshData.mesh);
         meshDifference.setTargetMesh(targetMeshDataIt->mesh);
         meshDifference.computeDifference();
+
+        const float accuracy = 0.0f;
+        const float completness = 0.0f;
+
+        // Show the results as TSV.
+        std::cout << sourceMeshData.name << "\t" << targetMeshDataIt->name << "\t" << accuracy
+                  << "\t" << completness << "\n";
 
         // Save PC heatmap as a .ply
         const std::string heatmapFilename = outputPath
