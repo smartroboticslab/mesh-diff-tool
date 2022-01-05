@@ -3,30 +3,30 @@
 #include <pcl/common/centroid.h>
 
 struct MeshData {
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     std::string name;
     pcl::PolygonMesh mesh;
     Eigen::Vector3d centroid;
 
-    MeshData(const std::string& name,
-             const pcl::PolygonMesh& mesh,
-             const Eigen::Vector3d& centroid) :
-            name(name), mesh(mesh), centroid(centroid){};
+    MeshData(const std::filesystem::path& path) : name(path.filename().string())
+    {
+        pcl::io::loadPolygonFilePLY(path.string(), mesh);
+        centroid = computeCentroid(mesh);
+    };
+
+    static Eigen::Vector3d computeCentroid(const pcl::PolygonMesh& mesh)
+    {
+        // Use the built in PCL, PC generation
+        Eigen::Vector4d centroid_h;
+        pcl::PointCloud<pcl::PointXYZ>::Ptr tempPC(new pcl::PointCloud<pcl::PointXYZ>());
+        pcl::fromPCLPointCloud2(mesh.cloud, *tempPC);
+        pcl::compute3DCentroid(*tempPC, centroid_h);
+        return centroid_h.head<3>();
+    }
+
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 typedef std::vector<MeshData, Eigen::aligned_allocator<MeshData>> MeshDataVector;
-
-Eigen::Vector3d computeCentroid(const pcl::PolygonMesh& mesh)
-{
-    // Use the built in PCL, PC generation
-    Eigen::Vector4d centroid_h;
-    pcl::PointCloud<pcl::PointXYZ>::Ptr tempPC(new pcl::PointCloud<pcl::PointXYZ>());
-
-    pcl::fromPCLPointCloud2(mesh.cloud, *tempPC);
-    pcl::compute3DCentroid(*tempPC, centroid_h);
-    return centroid_h.head<3>();
-}
 
 
 
@@ -51,33 +51,13 @@ int main(int argc, char** argv)
     // Iterate source Path
     MeshDataVector sourceDataVec;
     for (const auto& entry : std::filesystem::directory_iterator(sourcePath)) {
-        // Extract Mesh filename. ToDo -> check valid entries.
-        const std::string meshPath = entry.path().string();
-        const std::string meshFilename = entry.path().filename().string();
-        pcl::PolygonMesh meshData;
-        pcl::io::loadPolygonFilePLY(meshPath, meshData);
-
-        // Compute centroid
-        const Eigen::Vector3d meshCentroid = computeCentroid(meshData);
-
-        // Combine in a single struct
-        sourceDataVec.push_back(MeshData(meshFilename, meshData, meshCentroid));
+        sourceDataVec.push_back(MeshData(entry.path()));
     }
 
     // Iterate target Path
     MeshDataVector targetDataVec;
     for (const auto& entry : std::filesystem::directory_iterator(targetPath)) {
-        // Extract Mesh filename. ToDo -> check valid entries.
-        const std::string meshPath = entry.path().string();
-        const std::string meshFilename = entry.path().filename().string();
-        pcl::PolygonMesh meshData;
-        pcl::io::loadPolygonFilePLY(meshPath, meshData);
-
-        // Compute centroid
-        const Eigen::Vector3d meshCentroid = computeCentroid(meshData);
-
-        // Combine in a single struct
-        targetDataVec.push_back(MeshData(meshFilename, meshData, meshCentroid));
+        targetDataVec.push_back(MeshData(entry.path()));
     }
 
     // Pairs to be compared.
