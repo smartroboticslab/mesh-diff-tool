@@ -82,12 +82,15 @@ int main(int argc, char** argv)
     }
     std::sort(targetDataVec.begin(), targetDataVec.end());
 
-    // Print the TSV header.
-    std::cout << "Detected object\tGround truth object\tAccuracy (m)\tCompleteness (%)\n";
+    // Store the TSV data so that they can be printed in order when running with multiple threads.
+    std::vector<std::string> tsv_data(sourceDataVec.size() + 1);
+    tsv_data[0] = "Detected object\tGround truth object\tAccuracy (m)\tCompleteness (%)\n";
+
     // Pairs to be compared.
     std::set<std::string> lookup;
-    MeshDifference meshDifference(1000000.0);
-    for (const auto& sourceMeshData : sourceDataVec) {
+#pragma omp parallel for
+    for (size_t i = 0; i < sourceDataVec.size(); i++) {
+        const auto& sourceMeshData = sourceDataVec[i];
         // Locate the target Mesh based on the centroid distance.
         const auto targetMeshDataIt =
             std::min_element(targetDataVec.begin(),
@@ -97,15 +100,20 @@ int main(int argc, char** argv)
                                      < (rhs.centroid - sourceMeshData.centroid).norm();
                              });
 
-        // Check for matches to the same Mesh
-        if (lookup.count(targetMeshDataIt->name)) {
-            std::cerr << "Warning: duplicate object match to " << targetMeshDataIt->name << "\n";
-        }
-        else {
-            lookup.insert(targetMeshDataIt->name);
+#pragma omp critical(lookup)
+        {
+            // Check for matches to the same Mesh
+            if (lookup.count(targetMeshDataIt->name)) {
+                std::cerr << "Warning: duplicate object match to " << targetMeshDataIt->name
+                          << "\n";
+            }
+            else {
+                lookup.insert(targetMeshDataIt->name);
+            }
         }
 
         // Compute the Mesh diff
+        MeshDifference meshDifference(1000000.0);
         meshDifference.setSourceMesh(sourceMeshData.mesh);
         meshDifference.setTargetMesh(targetMeshDataIt->mesh);
         const float accuracy = meshDifference.computeDifference();
@@ -113,8 +121,9 @@ int main(int argc, char** argv)
         const float completness = 0.0f;
 
         // Show the results as TSV.
-        std::cout << sourceMeshData.filename.string() << "\t" << targetMeshDataIt->filename.string()
-                  << "\t" << accuracy << "\t" << completness << "\n";
+        tsv_data[i + 1] = sourceMeshData.filename.string() + "\t"
+            + targetMeshDataIt->filename.string() + "\t" + std::to_string(accuracy) + "\t"
+            + std::to_string(completness) + "\n";
 
         // Save PC heatmap as a .ply
         const std::string heatmapFilename = outputPath + "/"
@@ -126,6 +135,10 @@ int main(int argc, char** argv)
         Colormap colormap = Colormap::Turbo;
 
         meshDifference.saveHeatmapMesh(heatmapFilename, minDistance, maxDistance, colormap);
+    }
+
+    for (const auto& s : tsv_data) {
+        std::cout << s;
     }
 
     return 0;
