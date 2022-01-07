@@ -1,7 +1,9 @@
 #include <MeshDifference.hpp>
 #include <algorithm>
 #include <compare_multiple_options.hpp>
+#include <map>
 #include <pcl/common/centroid.h>
+#include <set>
 
 class MeshData {
     public:
@@ -102,8 +104,9 @@ int main(int argc, char** argv)
     std::vector<std::string> tsv_data(sourceDataVec.size() + 1);
     tsv_data[0] = "Source object\tTarget object\tHeatmap\tAccuracy (m)\tCompleteness (%)\n";
 
-    // Pairs to be compared.
-    std::set<std::string> lookup;
+    // Create a map from target to source meshes.
+    std::multimap<std::string, std::string> matches;
+    std::set<std::string> matchedTargets;
 #pragma omp parallel for
     for (size_t i = 0; i < sourceDataVec.size(); i++) {
         const auto& sourceMeshData = sourceDataVec[i];
@@ -116,16 +119,10 @@ int main(int argc, char** argv)
                                      < (rhs.centroid - sourceMeshData.centroid).norm();
                              });
 
-#pragma omp critical(lookup)
+#pragma omp critical(matches)
         {
-            // Check for matches to the same Mesh
-            if (lookup.count(targetMeshDataIt->name)) {
-                std::cerr << "Warning: duplicate object match to " << targetMeshDataIt->name
-                          << "\n";
-            }
-            else {
-                lookup.insert(targetMeshDataIt->name);
-            }
+            matches.insert({targetMeshDataIt->name, sourceMeshData.filename.string()});
+            matchedTargets.insert(targetMeshDataIt->name);
         }
 
         // Compute the Mesh diff
@@ -152,6 +149,23 @@ int main(int argc, char** argv)
         tsv_data[i + 1] = sourceMeshData.filename.string() + "\t"
             + targetMeshDataIt->filename.string() + "\t" + heatmapFilename + "\t"
             + std::to_string(accuracy) + "\t" + std::to_string(completness) + "\n";
+    }
+
+    // Show matching information and duplicate matches.
+    std::cout << "Matched " << matchedTargets.size() << "/" << targetDataVec.size()
+              << " target meshes\n";
+    for (const auto& m : targetDataVec) {
+        const size_t n = matches.count(m.name);
+        if (n == 0) {
+            std::cout << m.filename.string() << " not matched by any object\n";
+        }
+        else if (n > 1) {
+            std::cout << m.filename.string() << " matched by multiple objects:\n";
+            const auto r = matches.equal_range(m.name);
+            for (auto it = r.first; it != r.second; ++it) {
+                std::cout << "  " << it->second << "\n";
+            }
+        }
     }
 
     // Save the TSV data.
