@@ -1,7 +1,10 @@
 #include <argp.h>
 #include <compare_multiple_options.hpp>
 
-static char doc[] = "";
+static char doc[] =
+    "Try to match all PLY meshes in SOURCE_DIR to those in TARGET_DIR. "
+    "An error heatmap mesh will be created for each match and the per-mesh accuracy and "
+    "completness will be saved to a TSV file.";
 static char args_doc[] = "SOURCE_DIR TARGET_DIR";
 
 static struct argp_option program_options[] = {
