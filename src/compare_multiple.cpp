@@ -72,6 +72,14 @@ int main(int argc, char** argv)
         }
     }
     std::sort(sourceDataVec.begin(), sourceDataVec.end());
+    if (options.verbose) {
+        std::cout << "Loaded " << sourceDataVec.size() << " source meshes\n";
+    }
+    if (options.verbose > 1) {
+        for (const auto& m : sourceDataVec) {
+            std::cout << "  " << m.filename.string() << "\n";
+        }
+    }
 
     // Iterate target Path
     MeshData::Vector targetDataVec;
@@ -81,6 +89,14 @@ int main(int argc, char** argv)
         }
     }
     std::sort(targetDataVec.begin(), targetDataVec.end());
+    if (options.verbose) {
+        std::cout << "Loaded " << targetDataVec.size() << " target meshes\n";
+    }
+    if (options.verbose > 1) {
+        for (const auto& m : targetDataVec) {
+            std::cout << "  " << m.filename.string() << "\n";
+        }
+    }
 
     // Store the TSV data so that they can be printed in order when running with multiple threads.
     std::vector<std::string> tsv_data(sourceDataVec.size() + 1);
