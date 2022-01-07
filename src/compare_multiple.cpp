@@ -53,6 +53,13 @@ bool validFilename(const std::filesystem::path& path)
 
 
 
+bool objectFilename(const std::filesystem::path& path)
+{
+    return path.filename().string().find("object") != std::string::npos;
+}
+
+
+
 void usage(const char* program_name)
 {
     std::cout << "Usage: " << program_name << " MESH_DIR GT_MESH_DIR [HEATMAP_DIR]\n";
@@ -74,7 +81,7 @@ int main(int argc, char** argv)
     // Iterate source Path
     MeshData::Vector sourceDataVec;
     for (const auto& entry : std::filesystem::directory_iterator(sourcePath)) {
-        if (validFilename(entry.path())) {
+        if (validFilename(entry.path()) && objectFilename(entry.path())) {
             sourceDataVec.emplace_back(entry.path());
         }
     }
