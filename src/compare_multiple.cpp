@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <compare_multiple_options.hpp>
 #include <map>
+#include <mesh_desired_scale.hpp>
 #include <pcl/common/centroid.h>
 #include <set>
 
@@ -102,7 +103,8 @@ int main(int argc, char** argv)
 
     // Store the TSV data so that they can be printed in order when running with multiple threads.
     std::vector<std::string> tsv_data(sourceDataVec.size() + 1);
-    tsv_data[0] = "Source object\tTarget object\tHeatmap\tAccuracy (m)\tCompleteness (%)\n";
+    tsv_data[0] =
+        "Source object\tTarget object\tHeatmap\tAccuracy (m)\tCompleteness (%)\tDesired scale (%)\n";
 
     // Create a map from target to source meshes.
     std::multimap<std::string, std::string> matches;
@@ -130,8 +132,9 @@ int main(int argc, char** argv)
         meshDifference.setSourceMesh(sourceMeshData.mesh);
         meshDifference.setTargetMesh(targetMeshDataIt->mesh);
         const float accuracy = meshDifference.computeDifference();
-
         const float completness = 0.0f;
+        const float desired_scale =
+            percentage_at_scale(extract_mesh_scales(sourceMeshData.filename.string()), 0);
 
         // Save PC heatmap as a .ply
         const std::string heatmapFilename = options.heatmap_dir.string() + "/"
@@ -148,7 +151,8 @@ int main(int argc, char** argv)
         // Show the results as TSV.
         tsv_data[i + 1] = sourceMeshData.filename.string() + "\t"
             + targetMeshDataIt->filename.string() + "\t" + heatmapFilename + "\t"
-            + std::to_string(accuracy) + "\t" + std::to_string(completness) + "\n";
+            + std::to_string(accuracy) + "\t" + std::to_string(completness) + "\t"
+            + std::to_string(desired_scale) + "\n";
     }
 
     // Show matching information and duplicate matches.
