@@ -100,7 +100,7 @@ int main(int argc, char** argv)
 
     // Store the TSV data so that they can be printed in order when running with multiple threads.
     std::vector<std::string> tsv_data(sourceDataVec.size() + 1);
-    tsv_data[0] = "Detected object\tGround truth object\tAccuracy (m)\tCompleteness (%)\n";
+    tsv_data[0] = "Source object\tTarget object\tHeatmap\tAccuracy (m)\tCompleteness (%)\n";
 
     // Pairs to be compared.
     std::set<std::string> lookup;
@@ -136,11 +136,6 @@ int main(int argc, char** argv)
 
         const float completness = 0.0f;
 
-        // Show the results as TSV.
-        tsv_data[i + 1] = sourceMeshData.filename.string() + "\t"
-            + targetMeshDataIt->filename.string() + "\t" + std::to_string(accuracy) + "\t"
-            + std::to_string(completness) + "\n";
-
         // Save PC heatmap as a .ply
         const std::string heatmapFilename = options.heatmap_dir.string() + "/"
             + std::string(sourceMeshData.name.begin(), sourceMeshData.name.end() - 4)
@@ -151,6 +146,11 @@ int main(int argc, char** argv)
         Colormap colormap = Colormap::Turbo;
 
         meshDifference.saveHeatmapMesh(heatmapFilename, minDistance, maxDistance, colormap);
+
+        // Show the results as TSV.
+        tsv_data[i + 1] = sourceMeshData.filename.string() + "\t"
+            + targetMeshDataIt->filename.string() + "\t" + heatmapFilename + "\t"
+            + std::to_string(accuracy) + "\t" + std::to_string(completness) + "\n";
     }
 
     for (const auto& s : tsv_data) {
