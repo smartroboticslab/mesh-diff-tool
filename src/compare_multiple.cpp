@@ -3,7 +3,10 @@
 #include <filesystem>
 #include <pcl/common/centroid.h>
 
-struct MeshData {
+class MeshData {
+    public:
+    typedef std::vector<MeshData, Eigen::aligned_allocator<MeshData>> Vector;
+
     std::filesystem::path filename;
     std::string name;
     pcl::PolygonMesh mesh;
@@ -12,28 +15,29 @@ struct MeshData {
     MeshData(const std::filesystem::path& path) : filename(path), name(path.filename().string())
     {
         pcl::io::loadPolygonFilePLY(filename.string(), mesh);
-        centroid = computeCentroid(mesh);
+        computeCentroid();
     };
 
-    static Eigen::Vector3d computeCentroid(const pcl::PolygonMesh& mesh)
+    bool operator<(const MeshData& rhs) const
+    {
+        return name < rhs.name;
+    }
+
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+
+
+    private:
+    void computeCentroid()
     {
         // Use the built in PCL, PC generation
         Eigen::Vector4d centroid_h;
         pcl::PointCloud<pcl::PointXYZ>::Ptr tempPC(new pcl::PointCloud<pcl::PointXYZ>());
         pcl::fromPCLPointCloud2(mesh.cloud, *tempPC);
         pcl::compute3DCentroid(*tempPC, centroid_h);
-        return centroid_h.head<3>();
+        centroid = centroid_h.head<3>();
     }
-
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-
-typedef std::vector<MeshData, Eigen::aligned_allocator<MeshData>> MeshDataVector;
-
-bool operator<(const MeshData& lhs, const MeshData& rhs)
-{
-    return lhs.name < rhs.name;
-}
 
 
 
@@ -65,7 +69,7 @@ int main(int argc, char** argv)
     const std::string outputPath = (argc == 4) ? std::string(argv[3]) : sourcePath;
 
     // Iterate source Path
-    MeshDataVector sourceDataVec;
+    MeshData::Vector sourceDataVec;
     for (const auto& entry : std::filesystem::directory_iterator(sourcePath)) {
         if (validFilename(entry.path())) {
             sourceDataVec.emplace_back(entry.path());
@@ -74,7 +78,7 @@ int main(int argc, char** argv)
     std::sort(sourceDataVec.begin(), sourceDataVec.end());
 
     // Iterate target Path
-    MeshDataVector targetDataVec;
+    MeshData::Vector targetDataVec;
     for (const auto& entry : std::filesystem::directory_iterator(targetPath)) {
         if (validFilename(entry.path())) {
             targetDataVec.emplace_back(entry.path());
