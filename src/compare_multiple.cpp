@@ -43,9 +43,12 @@ class MeshData {
 
 bool validFilename(const std::filesystem::path& path)
 {
+    const bool is_file = !std::filesystem::is_directory(path);
+    const bool is_ply = path.extension() == ".ply";
     const std::string s = path;
     const std::string suffix = "_heatmap.ply";
-    return path.extension() == ".ply" && s.substr(s.size() - suffix.size()) != suffix;
+    const bool is_heatmap = s.substr(s.size() - suffix.size()) == suffix;
+    return is_file && is_ply && !is_heatmap;
 }
 
 
