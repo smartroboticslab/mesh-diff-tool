@@ -1,6 +1,6 @@
 #include <MeshDifference.hpp>
 #include <algorithm>
-#include <filesystem>
+#include <compare_multiple_options.hpp>
 #include <pcl/common/centroid.h>
 
 class MeshData {
@@ -60,27 +60,13 @@ bool objectFilename(const std::filesystem::path& path)
 
 
 
-void usage(const char* program_name)
-{
-    std::cout << "Usage: " << program_name << " MESH_DIR GT_MESH_DIR [HEATMAP_DIR]\n";
-}
-
-
-
 int main(int argc, char** argv)
 {
-    if (argc != 3 && argc != 4) {
-        usage(argv[0]);
-        return 2;
-    }
-    const std::string sourcePath(argv[1]);
-    const std::string targetPath(argv[2]);
-
-    const std::string outputPath = (argc == 4) ? std::string(argv[3]) : sourcePath;
+    const Options options = parse_options(argc, argv);
 
     // Iterate source Path
     MeshData::Vector sourceDataVec;
-    for (const auto& entry : std::filesystem::directory_iterator(sourcePath)) {
+    for (const auto& entry : std::filesystem::directory_iterator(options.source_mesh_dir)) {
         if (validFilename(entry.path()) && objectFilename(entry.path())) {
             sourceDataVec.emplace_back(entry.path());
         }
@@ -89,7 +75,7 @@ int main(int argc, char** argv)
 
     // Iterate target Path
     MeshData::Vector targetDataVec;
-    for (const auto& entry : std::filesystem::directory_iterator(targetPath)) {
+    for (const auto& entry : std::filesystem::directory_iterator(options.target_mesh_dir)) {
         if (validFilename(entry.path())) {
             targetDataVec.emplace_back(entry.path());
         }
@@ -140,7 +126,7 @@ int main(int argc, char** argv)
             + std::to_string(completness) + "\n";
 
         // Save PC heatmap as a .ply
-        const std::string heatmapFilename = outputPath + "/"
+        const std::string heatmapFilename = options.heatmap_dir.string() + "/"
             + std::string(sourceMeshData.name.begin(), sourceMeshData.name.end() - 4)
             + "_heatmap.ply";
 
