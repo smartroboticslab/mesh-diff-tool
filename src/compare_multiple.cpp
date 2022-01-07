@@ -145,6 +145,7 @@ int main(int argc, char** argv)
         const double maxDistance = 0.05;
         Colormap colormap = Colormap::Turbo;
 
+        std::filesystem::create_directories(options.heatmap_dir);
         meshDifference.saveHeatmapMesh(heatmapFilename, minDistance, maxDistance, colormap);
 
         // Show the results as TSV.
