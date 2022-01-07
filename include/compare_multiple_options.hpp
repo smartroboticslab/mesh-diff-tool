@@ -6,6 +6,7 @@ struct Options {
     std::filesystem::path source_mesh_dir;
     std::filesystem::path target_mesh_dir;
     std::filesystem::path heatmap_dir;
+    std::filesystem::path tsv_file;
     int verbose = 0;
 };
 

@@ -153,8 +153,10 @@ int main(int argc, char** argv)
             + std::to_string(accuracy) + "\t" + std::to_string(completness) + "\n";
     }
 
+    // Save the TSV data.
+    std::ofstream f(options.tsv_file);
     for (const auto& s : tsv_data) {
-        std::cout << s;
+        f << s;
     }
 
     return 0;

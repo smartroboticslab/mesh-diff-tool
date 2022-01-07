@@ -10,6 +10,11 @@ static struct argp_option program_options[] = {
      "DIR",
      0,
      "The directory where error heatmaps are saved. Defaults to SOURCE_DIR/heatmaps"},
+    {"tsv",
+     't',
+     "FILE",
+     0,
+     "The file where the TSV output will be saved. Defaults to SOURCE_DIR/mesh_comparison.tsv"},
     {"verbose",
      'v',
      0,
@@ -21,11 +26,17 @@ static error_t parse_opt(int key, char* arg, struct argp_state* state)
 {
     struct Options* options = static_cast<Options*>(state->input);
     bool heatmap_dir_supplied = false;
+    bool tsv_file_supplied = false;
 
     switch (key) {
     case 'h':
         options->heatmap_dir = arg;
         heatmap_dir_supplied = true;
+        break;
+
+    case 't':
+        options->tsv_file = arg;
+        tsv_file_supplied = true;
         break;
 
     case 'v':
@@ -57,9 +68,12 @@ static error_t parse_opt(int key, char* arg, struct argp_state* state)
         return ARGP_ERR_UNKNOWN;
     }
 
-    // Set the default heatmap directory if not provided.
+    // Set the default option values.
     if (!heatmap_dir_supplied) {
         options->heatmap_dir = options->source_mesh_dir / "heatmaps/";
+    }
+    if (!tsv_file_supplied) {
+        options->tsv_file = options->source_mesh_dir / "mesh_comparison.tsv";
     }
 
     return 0;
@@ -72,6 +86,7 @@ std::ostream& operator<<(std::ostream& os, const Options& options)
     os << "Source mesh directory: " << options.source_mesh_dir << "\n";
     os << "Target mesh directory: " << options.target_mesh_dir << "\n";
     os << "Heatmap directory:     " << options.heatmap_dir << "\n";
+    os << "TSV file:              " << options.tsv_file << "\n";
     os << "Verbose:               " << options.verbose << "\n";
     return os;
 }
