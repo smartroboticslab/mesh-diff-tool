@@ -61,24 +61,54 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr MeshDifference::sampleSurfaceMesh(const pcl:
 
 float MeshDifference::computeDifference()
 {
-    // Make sure the source and target Meshes are not empty.
-    if (sourceMesh_.polygons.empty() || targetMesh_.polygons.empty())
+    // Compute the distance between the source and the target Mesh.
+    if (!(computeMesh2MeshDistance(
+            sourceMesh_, targetMesh_, samplingDensity_, source2TargetDistance_)))
         return NAN;
 
-    // Reset the mesh difference vector.
-    meshDifference_.clear();
+    return rmse();
+}
 
-    // Convert the target Mesh to VTK polydata format and instantiate the Class
-    // used for the distance computation
-    vtkSmartPointer<vtkPolyData> targetMeshVTKPtr;
-    pcl::io::mesh2vtk(targetMesh_, targetMeshVTKPtr);
+
+float MeshDifference::computeCompleteness(const double inlierThreshold)
+{
+    // Compute the distance between the target and the source Mesh. targetMesh_
+    if (!(computeMesh2MeshDistance(
+            targetMesh_, sourceMesh_, samplingDensity_, target2SourceDistance_)))
+        return NAN;
+
+    // Compute the completeness percentage
+    return static_cast<float>(std::count_if(
+               target2SourceDistance_.begin(),
+               target2SourceDistance_.end(),
+               [&inlierThreshold](auto point) { return point.distance <= inlierThreshold; }))
+        / target2SourceDistance_.size();
+}
+
+
+bool MeshDifference::computeMesh2MeshDistance(const pcl::PolygonMesh& comparedMesh,
+                                              const pcl::PolygonMesh& referenceMesh,
+                                              const double samplingDensity,
+                                              DistanceDataVector& meshDifference)
+{
+    // Make sure the compared and reference meshes are not empty.
+    if (comparedMesh.polygons.empty() || referenceMesh.polygons.empty())
+        return false;
+
+    // Reset the mesh difference vector.
+    meshDifference.clear();
+
+    // Convert the reference Mesh to VTK polydata format and instantiate the Class
+    // used for the minimum distance computation
+    vtkSmartPointer<vtkPolyData> referenceMeshVTKPtr;
+    pcl::io::mesh2vtk(referenceMesh, referenceMeshVTKPtr);
 
     vtkSmartPointer<vtkImplicitPolyDataDistance> distance2MeshPtr =
         vtkSmartPointer<vtkImplicitPolyDataDistance>::New();
-    distance2MeshPtr->SetInput(targetMeshVTKPtr);
+    distance2MeshPtr->SetInput(referenceMeshVTKPtr);
 
-    // Sample the source Mesh and generate a PC.
-    auto sampledPCPtr = sampleSurfaceMesh(sourceMesh_, samplingDensity_);
+    // Sample the compared Mesh and generate a PC.
+    auto sampledPCPtr = sampleSurfaceMesh(comparedMesh, samplingDensity);
 
     // Iterate the sampledPC and compute the distance to the target Mesh.
     for (const auto& point : *sampledPCPtr) {
@@ -90,10 +120,10 @@ float MeshDifference::computeDifference()
         double minDistance = std::fabs(distance2MeshPtr->EvaluateFunction(buffer));
 
         // Push result
-        meshDifference_.push_back(PointDistanceData(p, minDistance));
+        meshDifference.push_back(PointDistanceData(p, minDistance));
     }
 
-    return rmse();
+    return true;
 }
 
 double MeshDifference::computeTotalArea(const vtkSmartPointer<vtkPolyData> polygonDataPtr)
@@ -140,24 +170,24 @@ void MeshDifference::sampleTriangleSurface(const Eigen::Vector3d p0,
 double MeshDifference::rmse() const
 {
     double sum_squares = 0.0;
-    for (const auto& d : meshDifference_) {
+    for (const auto& d : source2TargetDistance_) {
         sum_squares += d.distance * d.distance;
     }
-    return std::sqrt(sum_squares / meshDifference_.size());
+    return std::sqrt(sum_squares / source2TargetDistance_.size());
 }
 
-void MeshDifference::saveHeatmapMesh(const std::string& filename,
-                                     const double minDistance,
-                                     const double maxDistance,
-                                     const Colormap& colormap)
+void MeshDifference::saveAccuracyHeatmap(const std::string& filename,
+                                         const double minDistance,
+                                         const double maxDistance,
+                                         const Colormap& colormap)
 {
     // Check if output cloud is empty
-    if (meshDifference_.empty())
+    if (source2TargetDistance_.empty())
         return;
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr heatmapPCPtr(new pcl::PointCloud<pcl::PointXYZRGB>());
 
-    for (const auto& heatmapEntry : meshDifference_) {
+    for (const auto& heatmapEntry : source2TargetDistance_) {
         // Extract position.
         const Eigen::Vector3d position = heatmapEntry.point;
 
@@ -169,7 +199,48 @@ void MeshDifference::saveHeatmapMesh(const std::string& filename,
             std::max(std::min((distance - minDistance) / (maxDistance - minDistance), 1.0), 0.0);
 
         // Map to color and push to the pointcloud.
-        const tinycolormap::Color color = tinycolormap::GetColor(scaledDistance, colormap);
+        const Color color = tinycolormap::GetColor(scaledDistance, colormap);
+
+        pcl::PointXYZRGB colouredPoint;
+        colouredPoint.x = position(0);
+        colouredPoint.y = position(1);
+        colouredPoint.z = position(2);
+        colouredPoint.r = static_cast<uint8_t>(color.r() * 255.0);
+        colouredPoint.g = static_cast<uint8_t>(color.g() * 255.0);
+        colouredPoint.b = static_cast<uint8_t>(color.b() * 255.0);
+
+        heatmapPCPtr->push_back(colouredPoint);
+    }
+
+    // Save to disk.
+    const bool export_binary = true;
+    pcl::io::savePLYFile(filename, *heatmapPCPtr, export_binary);
+}
+
+void MeshDifference::saveCompletenessHeatmap(const std::string& filename,
+                                             const double minDistance,
+                                             const double maxDistance,
+                                             const Color& inlierColor,
+                                             const Color& outlierColor)
+{
+    // Check if output cloud is empty
+    if (target2SourceDistance_.empty())
+        return;
+
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr heatmapPCPtr(new pcl::PointCloud<pcl::PointXYZRGB>());
+
+    for (const auto& heatmapEntry : target2SourceDistance_) {
+        // Extract position.
+        const Eigen::Vector3d position = heatmapEntry.point;
+
+        // Extract distance.
+        const double distance = heatmapEntry.distance;
+
+        // Check if point is inlier or outlier
+        const bool isInlier = (distance >= minDistance) && (distance <= maxDistance);
+
+        // Map to color and push to the pointcloud.
+        const tinycolormap::Color color = isInlier ? inlierColor : outlierColor;
 
         pcl::PointXYZRGB colouredPoint;
         colouredPoint.x = position(0);
