@@ -136,7 +136,7 @@ int main(int argc, char** argv)
         MeshDifference meshDifference(samplingDensity);
         meshDifference.setSourceMesh(sourceMeshData.mesh);
         meshDifference.setTargetMesh(targetMeshDataIt->mesh);
-        const float accuracy = meshDifference.computeDifference();
+        const float accuracy = meshDifference.computeDifference(inlierThreshold);
         const float completeness = 100.0f * meshDifference.computeCompleteness(inlierThreshold);
         const float desired_scale =
             percentage_at_scale(extract_mesh_scales(sourceMeshData.filename.string()), 0);

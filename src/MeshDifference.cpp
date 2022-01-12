@@ -59,14 +59,24 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr MeshDifference::sampleSurfaceMesh(const pcl:
     return sampledPCPtr;
 }
 
-float MeshDifference::computeDifference()
+float MeshDifference::computeDifference(const double inlierThreshold)
 {
     // Compute the distance between the source and the target Mesh.
     if (!(computeMesh2MeshDistance(
             sourceMesh_, targetMesh_, samplingDensity_, source2TargetDistance_)))
         return NAN;
 
-    return rmse();
+    // Compute the RMSE of the inliers
+    double sum_squares = 0.0;
+    size_t no_inliers = 0;
+    for (const auto& d : source2TargetDistance_) {
+        if (d.distance > inlierThreshold)
+            continue;
+        sum_squares += d.distance * d.distance;
+        no_inliers++;
+    }
+
+    return no_inliers ? std::sqrt(sum_squares / no_inliers) : 0.f;
 }
 
 

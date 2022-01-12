@@ -87,9 +87,14 @@ class MeshDifference {
      * @brief      Calculates the difference between the source and the target
      *             mesh and returns the RMSE error.
      *
+     * @param[in]  inlierThreshold  The threshold in meters used to clasify a
+     *                              point as inlier (i.e. distance <=
+     *                              inlierThreshold). The input value only
+     *                              affects the computation of the RMSE.
+     *
      * @return     The RMSE error in metres.
      */
-    float computeDifference();
+    float computeDifference(const double inlierThreshold);
 
 
     /**
