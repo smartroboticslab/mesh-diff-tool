@@ -70,7 +70,7 @@ int main(int argc, char** argv)
 
     // Hardcoded parameters. ToDo -> Consider adding these in the Options
     const double inlierThreshold = 0.05;
-    const double samplingDensity = 1e+6; // number of points per m^2
+    const double samplingDensity = 0.0; // number of points per m^2
 
     // Iterate source Path
     MeshData::Vector sourceDataVec;
