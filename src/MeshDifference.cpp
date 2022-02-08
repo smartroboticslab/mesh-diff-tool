@@ -1,4 +1,5 @@
 #include <MeshDifference.hpp>
+#include <pcl/conversions.h>
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr MeshDifference::sampleSurfaceMesh(const pcl::PolygonMesh& mesh,
                                                                       const double samplingDensity)
@@ -57,6 +58,13 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr MeshDifference::sampleSurfaceMesh(const pcl:
     }
 
     return sampledPCPtr;
+}
+
+pcl::PointCloud<pcl::PointXYZ>::Ptr MeshDifference::meshToPointCloud(const pcl::PolygonMesh& mesh)
+{
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloudPtr(new pcl::PointCloud<pcl::PointXYZ>());
+    pcl::fromPCLPointCloud2(mesh.cloud, *cloudPtr);
+    return cloudPtr;
 }
 
 float MeshDifference::computeDifference(const double inlierThreshold)
@@ -118,7 +126,8 @@ bool MeshDifference::computeMesh2MeshDistance(const pcl::PolygonMesh& comparedMe
     distance2MeshPtr->SetInput(referenceMeshVTKPtr);
 
     // Sample the compared Mesh and generate a PC.
-    auto sampledPCPtr = sampleSurfaceMesh(comparedMesh, samplingDensity);
+    auto sampledPCPtr = (samplingDensity == 0.0 ? meshToPointCloud(comparedMesh)
+                                                : sampleSurfaceMesh(comparedMesh, samplingDensity));
 
     // Iterate the sampledPC and compute the distance to the target Mesh.
     for (const auto& point : *sampledPCPtr) {

@@ -106,7 +106,9 @@ class MeshDifference {
      * @param[in]  comparedMesh     The compared mesh
      * @param[in]  referenceMesh    The reference mesh i.e. the distances will
      *                              be computed relatively to its triangles.
-     * @param[in]  samplingDensity  The sampling density used for the spatial mesh sampling. Units in  #points/m^2
+     * @param[in]  samplingDensity  The sampling density used for the spatial mesh sampling. Units
+     *                              in  #points/m^2. Use the mesh vertices instead of sampling when
+     *                              it's 0.
      * @param      meshDifference   The PC containing the distance info.
      *
      * @return     True when successful.
@@ -161,6 +163,14 @@ class MeshDifference {
    */
     pcl::PointCloud<pcl::PointXYZ>::Ptr sampleSurfaceMesh(const pcl::PolygonMesh& mesh,
                                                           const double samplingDensity);
+    /**
+     * @brief      Create a pointcloud using the vertices from mesh.
+     *
+     * @param[in]  mesh             The mesh whose vertices will be used.
+     *
+     * @return     The created pointcloud.
+     */
+    pcl::PointCloud<pcl::PointXYZ>::Ptr meshToPointCloud(const pcl::PolygonMesh& mesh);
 
     /**
    * @brief      Samples a point on the triangle surface given by the vertices
