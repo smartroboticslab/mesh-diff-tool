@@ -37,8 +37,8 @@ std::map<int8_t, int> extract_mesh_scales(const std::string& filename)
     std::ifstream f(filename);
     // Parse the PLY header.
     bool element_face_found = false;
-    // TODO compute the scale property index instead of assuming 1
-    int property_scale_idx = 1;
+    bool property_scale_found = false;
+    int property_scale_idx = 0;
     size_t num_faces = 0;
     size_t num_non_faces = 0;
     for (std::string line; std::getline(f, line) && line != "end_header";) {
@@ -49,6 +49,13 @@ std::map<int8_t, int> extract_mesh_scales(const std::string& filename)
         if (begins_with(line, "element face ")) {
             element_face_found = true;
             num_faces = std::stoll(column(line, 2));
+        }
+        else if (element_face_found && !property_scale_found && begins_with(line, "property ")) {
+            if (begins_with(line, "property char scale")) {
+                property_scale_found = true;
+            } else {
+                property_scale_idx++;
+            }
         }
         else if (!element_face_found && begins_with(line, "element ")) {
             num_non_faces += std::stoll(column(line, 2));
