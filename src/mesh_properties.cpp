@@ -1,5 +1,6 @@
 #include "mesh_properties.hpp"
 
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -79,6 +80,50 @@ std::map<int8_t, int> extract_mesh_scales(const std::string& filename)
     return scales;
 }
 
+std::vector<float> extract_mesh_distances(const std::string& filename)
+{
+    std::vector<float> distances;
+    std::ifstream f(filename);
+    // Parse the PLY header.
+    bool element_face_found = false;
+    bool property_found = false;
+    int property_idx = 0;
+    size_t num_faces = 0;
+    size_t num_non_faces = 0;
+    for (std::string line; std::getline(f, line) && line != "end_header";) {
+        if (begins_with(line, "format binary ")) {
+            // Can only handle ASCII PLY files.
+            return distances;
+        }
+        if (begins_with(line, "element face ")) {
+            element_face_found = true;
+            num_faces = std::stoll(column(line, 2));
+        }
+        else if (element_face_found && !property_found && begins_with(line, "property ")) {
+            if (begins_with(line, "property float dist")) {
+                property_found = true;
+            }
+            else {
+                property_idx++;
+            }
+        }
+        else if (!element_face_found && begins_with(line, "element ")) {
+            num_non_faces += std::stoll(column(line, 2));
+        }
+    }
+    // Skip the non-face lines.
+    for (std::string line; num_non_faces > 0 && std::getline(f, line); num_non_faces--) {
+    }
+    // Iterate over the face lines.
+    distances.reserve(num_faces);
+    for (std::string line; num_faces > 0 && std::getline(f, line); num_faces--) {
+        const int dist_col = std::stoi(column(line, 0)) + property_idx;
+        const float dist = std::stoi(column(line, dist_col));
+        distances.push_back(dist);
+    }
+    return distances;
+}
+
 float percentage_at_scale(const std::map<int8_t, int>& mesh_scales, int8_t desired_scale)
 {
     long int total_data = 0;
@@ -90,4 +135,13 @@ float percentage_at_scale(const std::map<int8_t, int>& mesh_scales, int8_t desir
         }
     }
     return 100.0 * desired_data / total_data;
+}
+
+float percentage_at_distance(const std::vector<float>& mesh_distances, float desired_distance)
+{
+    return 100.0
+        * std::count_if(mesh_distances.begin(),
+                        mesh_distances.end(),
+                        [&desired_distance](float d) { return d <= desired_distance; })
+        / mesh_distances.size();
 }
