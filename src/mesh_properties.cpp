@@ -1,5 +1,6 @@
+#include "mesh_properties.hpp"
+
 #include <fstream>
-#include <mesh_desired_scale.hpp>
 #include <sstream>
 #include <vector>
 

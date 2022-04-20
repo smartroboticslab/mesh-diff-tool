@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <compare_multiple_options.hpp>
 #include <map>
-#include <mesh_desired_scale.hpp>
+#include <mesh_properties.hpp>
 #include <pcl/common/centroid.h>
 #include <set>
 
