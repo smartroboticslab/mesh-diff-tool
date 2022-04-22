@@ -71,6 +71,8 @@ int main(int argc, char** argv)
     // Hardcoded parameters. ToDo -> Consider adding these in the Options
     const double inlierThreshold = 0.05;
     const double samplingDensity = 0.0; // number of points per m^2
+    constexpr int desired_scale = 0;
+    constexpr float desired_dist = 1.0f;
 
     // Iterate source Path
     MeshData::Vector sourceDataVec;
@@ -109,7 +111,7 @@ int main(int argc, char** argv)
     // Store the TSV data so that they can be printed in order when running with multiple threads.
     std::vector<std::string> tsv_data(sourceDataVec.size() + 1);
     tsv_data[0] =
-        "Source object\tTarget object\tHeatmap\tAccuracy (m)\tCompleteness (%)\tDesired scale (%)\tMean observed dist (m)\tDesired observed dist(%)\n";
+        "Source object\tTarget object\tHeatmap\tAccuracy (m)\tCompleteness (%)\tDesired scale (%)\tMean observed dist (m)\tDesired observed dist (%)\n";
 
     // Create a map from target to source meshes.
     std::multimap<std::string, std::string> matches;
@@ -138,11 +140,11 @@ int main(int argc, char** argv)
         meshDifference.setTargetMesh(targetMeshDataIt->mesh);
         const float accuracy = meshDifference.computeDifference(inlierThreshold);
         const float completeness = 100.0f * meshDifference.computeCompleteness(inlierThreshold);
-        const float desired_scale =
-            percentage_at_scale(extract_mesh_scales(sourceMeshData.filename.string()), 0);
+        const float pc_desired_scale = percentage_at_scale(
+            extract_mesh_scales(sourceMeshData.filename.string()), desired_scale);
         const float mean_dist = mean(extract_mesh_distances(sourceMeshData.filename.string()));
-        const float desired_dist =
-            percentage_at_distance(extract_mesh_distances(sourceMeshData.filename.string()), 1.0f);
+        const float pc_desired_dist = percentage_at_distance(
+            extract_mesh_distances(sourceMeshData.filename.string()), desired_dist);
 
         // Save accuracy and completeness Heatmaps as .ply
         const std::string accuracyHeatmapFilename = options.heatmap_dir.string() + "/"
@@ -171,8 +173,8 @@ int main(int argc, char** argv)
         tsv_data[i + 1] = sourceMeshData.filename.string() + "\t"
             + targetMeshDataIt->filename.string() + "\t" + accuracyHeatmapFilename + "\t"
             + std::to_string(accuracy) + "\t" + std::to_string(completeness) + "\t"
-            + std::to_string(desired_scale) + "\t" + std::to_string(mean_dist) + "\t"
-            + std::to_string(desired_dist) + "\n";
+            + std::to_string(pc_desired_scale) + "\t" + std::to_string(mean_dist) + "\t"
+            + std::to_string(pc_desired_dist) + "\n";
     }
 
     // Show matching information and duplicate matches.
