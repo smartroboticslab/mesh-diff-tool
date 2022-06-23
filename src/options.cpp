@@ -28,18 +28,14 @@ static struct argp_option program_options[] = {
 static error_t parse_opt(int key, char* arg, struct argp_state* state)
 {
     struct Options* options = static_cast<Options*>(state->input);
-    bool heatmap_dir_supplied = false;
-    bool tsv_file_supplied = false;
 
     switch (key) {
     case 'h':
         options->heatmap_dir = arg;
-        heatmap_dir_supplied = true;
         break;
 
     case 't':
         options->tsv_file = arg;
-        tsv_file_supplied = true;
         break;
 
     case 'v':
@@ -71,14 +67,6 @@ static error_t parse_opt(int key, char* arg, struct argp_state* state)
         return ARGP_ERR_UNKNOWN;
     }
 
-    // Set the default option values.
-    if (!heatmap_dir_supplied) {
-        options->heatmap_dir = options->source_mesh_path / "heatmaps/";
-    }
-    if (!tsv_file_supplied) {
-        options->tsv_file = options->source_mesh_path / "mesh_comparison.tsv";
-    }
-
     return 0;
 }
 
@@ -101,6 +89,13 @@ Options parse_options(int argc, char** argv)
     Options options;
     struct argp argp_options = {program_options, parse_opt, args_doc, doc};
     argp_parse(&argp_options, argc, argv, 0, 0, &options);
+    // Set the default option values.
+    if (options.heatmap_dir.empty()) {
+        options.heatmap_dir = options.source_mesh_path / "heatmaps/";
+    }
+    if (options.tsv_file.empty()) {
+        options.tsv_file = options.source_mesh_path / "mesh_comparison.tsv";
+    }
     if (options.verbose) {
         std::cout << options;
     }
