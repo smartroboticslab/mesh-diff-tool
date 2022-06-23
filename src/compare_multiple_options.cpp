@@ -2,22 +2,22 @@
 #include <compare_multiple_options.hpp>
 
 static char doc[] =
-    "Try to match all PLY meshes in SOURCE_DIR to those in TARGET_DIR. "
+    "Try to match all PLY meshes in SOURCE_PATH to those in TARGET_PATH. "
     "An error heatmap mesh will be created for each match and the per-mesh accuracy and "
     "completness will be saved to a TSV file.";
-static char args_doc[] = "SOURCE_DIR TARGET_DIR";
+static char args_doc[] = "SOURCE_PATH TARGET_PATH";
 
 static struct argp_option program_options[] = {
     {"heatmap-dir",
      'h',
-     "DIR",
+     "PATH",
      0,
-     "The directory where error heatmaps are saved. Defaults to SOURCE_DIR/heatmaps"},
+     "The directory where error heatmaps are saved. Defaults to SOURCE_PATH/heatmaps"},
     {"tsv",
      't',
      "FILE",
      0,
-     "The file where the TSV output will be saved. Defaults to SOURCE_DIR/mesh_comparison.tsv"},
+     "The file where the TSV output will be saved. Defaults to SOURCE_PATH/mesh_comparison.tsv"},
     {"verbose",
      'v',
      0,
@@ -49,10 +49,10 @@ static error_t parse_opt(int key, char* arg, struct argp_state* state)
     case ARGP_KEY_ARG:
         switch (state->arg_num) {
         case 0:
-            options->source_mesh_dir = arg;
+            options->source_mesh_path = arg;
             break;
         case 1:
-            options->target_mesh_dir = arg;
+            options->target_mesh_path = arg;
             break;
         default:
             // Too many options.
@@ -73,10 +73,10 @@ static error_t parse_opt(int key, char* arg, struct argp_state* state)
 
     // Set the default option values.
     if (!heatmap_dir_supplied) {
-        options->heatmap_dir = options->source_mesh_dir / "heatmaps/";
+        options->heatmap_dir = options->source_mesh_path / "heatmaps/";
     }
     if (!tsv_file_supplied) {
-        options->tsv_file = options->source_mesh_dir / "mesh_comparison.tsv";
+        options->tsv_file = options->source_mesh_path / "mesh_comparison.tsv";
     }
 
     return 0;
@@ -86,11 +86,11 @@ static error_t parse_opt(int key, char* arg, struct argp_state* state)
 
 std::ostream& operator<<(std::ostream& os, const Options& options)
 {
-    os << "Source mesh directory: " << options.source_mesh_dir << "\n";
-    os << "Target mesh directory: " << options.target_mesh_dir << "\n";
-    os << "Heatmap directory:     " << options.heatmap_dir << "\n";
-    os << "TSV file:              " << options.tsv_file << "\n";
-    os << "Verbose:               " << options.verbose << "\n";
+    os << "Source mesh path:  " << options.source_mesh_path << "\n";
+    os << "Target mesh path:  " << options.target_mesh_path << "\n";
+    os << "Heatmap directory: " << options.heatmap_dir << "\n";
+    os << "TSV file:          " << options.tsv_file << "\n";
+    os << "Verbose:           " << options.verbose << "\n";
     return os;
 }
 

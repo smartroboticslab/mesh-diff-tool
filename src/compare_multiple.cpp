@@ -76,7 +76,7 @@ int main(int argc, char** argv)
 
     // Iterate source Path
     MeshData::Vector sourceDataVec;
-    for (const auto& entry : std::filesystem::directory_iterator(options.source_mesh_dir)) {
+    for (const auto& entry : std::filesystem::directory_iterator(options.source_mesh_path)) {
         if (validFilename(entry.path()) && objectFilename(entry.path())) {
             sourceDataVec.emplace_back(entry.path());
         }
@@ -93,7 +93,7 @@ int main(int argc, char** argv)
 
     // Iterate target Path
     MeshData::Vector targetDataVec;
-    for (const auto& entry : std::filesystem::directory_iterator(options.target_mesh_dir)) {
+    for (const auto& entry : std::filesystem::directory_iterator(options.target_mesh_path)) {
         if (validFilename(entry.path())) {
             targetDataVec.emplace_back(entry.path());
         }
