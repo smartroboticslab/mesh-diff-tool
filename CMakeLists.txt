@@ -23,3 +23,6 @@ include_directories(include)
 
 add_executable (compareMultiple src/options.cpp src/mesh_properties.cpp src/compare_multiple.cpp src/MeshDifference.cpp)
 target_link_libraries (compareMultiple ${PCL_LIBRARIES})
+
+add_executable (compare-single src/options.cpp src/mesh_properties.cpp src/compare_single.cpp src/MeshDifference.cpp)
+target_link_libraries (compare-single ${PCL_LIBRARIES})
