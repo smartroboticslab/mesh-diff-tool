@@ -1,8 +1,8 @@
 #include <MeshDifference.hpp>
 #include <algorithm>
-#include <compare_multiple_options.hpp>
 #include <map>
 #include <mesh_properties.hpp>
+#include <options.hpp>
 #include <pcl/common/centroid.h>
 #include <set>
 

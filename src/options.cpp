@@ -1,5 +1,5 @@
 #include <argp.h>
-#include <compare_multiple_options.hpp>
+#include <options.hpp>
 
 static char doc[] =
     "Try to match all PLY meshes in SOURCE_PATH to those in TARGET_PATH. "

@@ -21,5 +21,5 @@ add_definitions(${PCL_DEFINITIONS})
 include_directories(tinycolormap/include)
 include_directories(include)
 
-add_executable (compareMultiple src/compare_multiple_options.cpp src/mesh_properties.cpp src/compare_multiple.cpp src/MeshDifference.cpp)
+add_executable (compareMultiple src/options.cpp src/mesh_properties.cpp src/compare_multiple.cpp src/MeshDifference.cpp)
 target_link_libraries (compareMultiple ${PCL_LIBRARIES})
