@@ -111,7 +111,7 @@ int main(int argc, char** argv)
     // Store the TSV data so that they can be printed in order when running with multiple threads.
     std::vector<std::string> tsv_data(sourceDataVec.size() + 1);
     tsv_data[0] =
-        "Source object\tTarget object\tHeatmap\tAccuracy (m)\tCompleteness (%)\tDesired scale (%)\tMean observed dist (m)\tDesired observed dist (%)\n";
+        "Source object\tTarget object\tAccuracy (m)\tCompleteness (%)\tDesired scale (%)\tMean observed dist (m)\tDesired observed dist (%)\n";
 
     // Create a map from target to source meshes.
     std::multimap<std::string, std::string> matches;
@@ -147,34 +147,36 @@ int main(int argc, char** argv)
             extract_mesh_distances(sourceMeshData.filename.string()), desired_dist);
 
         // Save accuracy and completeness Heatmaps as .ply
-        const std::string accuracyHeatmapFilename = options.heatmap_dir.string() + "/"
-            + std::string(sourceMeshData.name.begin(), sourceMeshData.name.end() - 4)
-            + "_acc_heatmap.ply";
+        if (!options.heatmap_dir.empty()) {
+            const std::string accuracyHeatmapFilename = options.heatmap_dir.string() + "/"
+                + std::string(sourceMeshData.name.begin(), sourceMeshData.name.end() - 4)
+                + "_acc_heatmap.ply";
 
-        const std::string completenessHeatmapFilename = options.heatmap_dir.string() + "/"
-            + std::string(targetMeshDataIt->name.begin(), targetMeshDataIt->name.end() - 4)
-            + "_compl_heatmap.ply";
+            const std::string completenessHeatmapFilename = options.heatmap_dir.string() + "/"
+                + std::string(targetMeshDataIt->name.begin(), targetMeshDataIt->name.end() - 4)
+                + "_compl_heatmap.ply";
 
-        Colormap colormap = Colormap::Turbo;
+            Colormap colormap = Colormap::Turbo;
 
-        std::filesystem::create_directories(options.heatmap_dir);
+            std::filesystem::create_directories(options.heatmap_dir);
 
-        // Save accuracy heatmap
-        meshDifference.saveAccuracyHeatmap(accuracyHeatmapFilename, 0.0, inlierThreshold, colormap);
+            // Save accuracy heatmap
+            meshDifference.saveAccuracyHeatmap(
+                accuracyHeatmapFilename, 0.0, inlierThreshold, colormap);
 
-        // Save completeness heatmap
-        meshDifference.saveCompletenessHeatmap(completenessHeatmapFilename,
-                                               0.0,
-                                               inlierThreshold,
-                                               tinycolormap::GetColor(0.0, colormap),
-                                               tinycolormap::GetColor(1.0, colormap));
+            // Save completeness heatmap
+            meshDifference.saveCompletenessHeatmap(completenessHeatmapFilename,
+                                                   0.0,
+                                                   inlierThreshold,
+                                                   tinycolormap::GetColor(0.0, colormap),
+                                                   tinycolormap::GetColor(1.0, colormap));
+        }
 
         // Show the results as TSV.
         tsv_data[i + 1] = sourceMeshData.filename.string() + "\t"
-            + targetMeshDataIt->filename.string() + "\t" + accuracyHeatmapFilename + "\t"
-            + std::to_string(accuracy) + "\t" + std::to_string(completeness) + "\t"
-            + std::to_string(pc_desired_scale) + "\t" + std::to_string(mean_dist) + "\t"
-            + std::to_string(pc_desired_dist) + "\n";
+            + targetMeshDataIt->filename.string() + "\t" + std::to_string(accuracy) + "\t"
+            + std::to_string(completeness) + "\t" + std::to_string(pc_desired_scale) + "\t"
+            + std::to_string(mean_dist) + "\t" + std::to_string(pc_desired_dist) + "\n";
     }
 
     // Show matching information and duplicate matches.

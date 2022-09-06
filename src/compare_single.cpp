@@ -74,30 +74,33 @@ int main(int argc, char** argv)
         extract_mesh_distances(options.source_mesh_path.string()), desired_dist);
 
     // Save accuracy and completeness Heatmaps as .ply
-    Colormap colormap = Colormap::Turbo;
-    // std::filesystem::create_directories() fails on symbolic links to directories so test for
-    // existence first.
-    if (!std::filesystem::exists(options.heatmap_dir)) {
-        std::filesystem::create_directories(options.heatmap_dir);
+    if (!options.heatmap_dir.empty()) {
+        Colormap colormap = Colormap::Turbo;
+        // std::filesystem::create_directories() fails on symbolic links to directories so test for
+        // existence first.
+        if (!std::filesystem::exists(options.heatmap_dir)) {
+            std::filesystem::create_directories(options.heatmap_dir);
+        }
+        const std::string accuracyHeatmapFilename =
+            options.heatmap_dir.string() + "/acc_heatmap.ply";
+        meshDifference.saveAccuracyHeatmap(accuracyHeatmapFilename, 0.0, inlierThreshold, colormap);
+        const std::string completenessHeatmapFilename =
+            options.heatmap_dir.string() + "/compl_heatmap.ply";
+        meshDifference.saveCompletenessHeatmap(completenessHeatmapFilename,
+                                               0.0,
+                                               inlierThreshold,
+                                               tinycolormap::GetColor(0.0, colormap),
+                                               tinycolormap::GetColor(1.0, colormap));
     }
-    const std::string accuracyHeatmapFilename = options.heatmap_dir.string() + "/acc_heatmap.ply";
-    meshDifference.saveAccuracyHeatmap(accuracyHeatmapFilename, 0.0, inlierThreshold, colormap);
-    const std::string completenessHeatmapFilename =
-        options.heatmap_dir.string() + "/compl_heatmap.ply";
-    meshDifference.saveCompletenessHeatmap(completenessHeatmapFilename,
-                                           0.0,
-                                           inlierThreshold,
-                                           tinycolormap::GetColor(0.0, colormap),
-                                           tinycolormap::GetColor(1.0, colormap));
 
     // Write the TSV data.
     {
         std::ofstream f(options.tsv_file);
-        f << "Source object\tTarget object\tHeatmap\tAccuracy (m)\tCompleteness (%)\tDesired scale (%)\tMean observed dist (m)\tDesired observed dist (%)\n";
+        f << "Source object\tTarget object\tAccuracy (m)\tCompleteness (%)\tDesired scale (%)\tMean observed dist (m)\tDesired observed dist (%)\n";
         f << options.source_mesh_path.string() + "\t" + options.target_mesh_path.string() + "\t"
-                + accuracyHeatmapFilename + "\t" + std::to_string(accuracy) + "\t"
-                + std::to_string(completeness) + "\t" + std::to_string(pc_desired_scale) + "\t"
-                + std::to_string(mean_dist) + "\t" + std::to_string(pc_desired_dist) + "\n";
+                + std::to_string(accuracy) + "\t" + std::to_string(completeness) + "\t"
+                + std::to_string(pc_desired_scale) + "\t" + std::to_string(mean_dist) + "\t"
+                + std::to_string(pc_desired_dist) + "\n";
     }
     return 0;
 }
