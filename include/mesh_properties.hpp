@@ -1,3 +1,10 @@
+/*
+ * SPDX-FileCopyrightText: 2021-2023 Smart Robotics Lab, Imperial College London, Technical University of Munich
+ * SPDX-FileCopyrightText: 2021-2022 Dimos Tzoumanikas
+ * SPDX-FileCopyrightText: 2022-2023 Sotiris Papatheodorou
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 #ifndef MESH_PROPERTIES_HPP
 #define MESH_PROPERTIES_HPP
 #include <cstdint>

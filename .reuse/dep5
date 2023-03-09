@@ -1,0 +1,6 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: mesh-diff-tool
+
+Files: CMakeLists.txt README.md .clang-format .editorconfig .gitmodules .gitignore
+Copyright: 2021-2023 Smart Robotics Lab, Imperial College London, Technical University of Munich
+License: CC0-1.0
