@@ -76,11 +76,8 @@ std::map<int8_t, int> extract_mesh_scales(const std::string& filename)
     // Iterate over the face lines.
     for (std::string line; num_faces > 0 && std::getline(f, line); num_faces--) {
         const int scale_col = std::stoi(column(line, 0)) + property_scale_idx;
-        int8_t scale;
-        if (column(line, scale_col) == "") {
-            scale = 0;
-        }
-        else {
+        int8_t scale = 0;
+        if (column(line, scale_col) != "") {
             scale = std::stoi(column(line, scale_col));
         }
 
@@ -132,11 +129,8 @@ std::vector<float> extract_mesh_distances(const std::string& filename)
     distances.reserve(num_faces);
     for (std::string line; num_faces > 0 && std::getline(f, line); num_faces--) {
         const int dist_col = std::stoi(column(line, 0)) + property_idx;
-        float dist;
-        if (column(line, dist_col) == "") {
-            dist = 0.0f;
-        }
-        else {
+        float dist = 0.0f;
+        if (column(line, dist_col) != "") {
             dist = std::stoi(column(line, dist_col));
         }
         distances.push_back(dist);
