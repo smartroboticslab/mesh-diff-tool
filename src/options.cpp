@@ -8,11 +8,16 @@
 #include <argp.h>
 #include <options.hpp>
 
-static char doc[] =
+static char doc_single[] =
+    "Try to match the PLY meshe SOURCE_MESH to TARGET_MESH. An error heatmap mesh will be created "
+    "and the accuracy and completness will be saved to a TSV file.";
+static char args_doc_single[] = "SOURCE_MESH TARGET_MESH";
+
+static char doc_multi[] =
     "Try to match all PLY meshes in SOURCE_PATH to those in TARGET_PATH. "
     "An error heatmap mesh will be created for each match and the per-mesh accuracy and "
     "completness will be saved to a TSV file.";
-static char args_doc[] = "SOURCE_PATH TARGET_PATH";
+static char args_doc_multi[] = "SOURCE_PATH TARGET_PATH";
 
 static struct argp_option program_options[] = {
     {"heatmap-dir",
@@ -93,6 +98,15 @@ std::ostream& operator<<(std::ostream& os, const Options& options)
 
 Options parse_options(int argc, char** argv)
 {
+    const char* args_doc = args_doc_multi;
+    const char* doc = doc_multi;
+    if (argc > 0) {
+        const std::string program_name(argv[0]);
+        if (program_name.find("single") != std::string::npos) {
+            args_doc = args_doc_single;
+            doc = doc_single;
+        }
+    }
     Options options;
     struct argp argp_options = {program_options, parse_opt, args_doc, doc};
     argp_parse(&argp_options, argc, argv, 0, 0, &options);
