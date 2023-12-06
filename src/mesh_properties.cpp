@@ -11,6 +11,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <iostream>
 
 bool begins_with(const std::string& s, const std::string& prefix)
 {
@@ -76,7 +77,14 @@ std::map<int8_t, int> extract_mesh_scales(const std::string& filename)
     // Iterate over the face lines.
     for (std::string line; num_faces > 0 && std::getline(f, line); num_faces--) {
         const int scale_col = std::stoi(column(line, 0)) + property_scale_idx;
-        const int8_t scale = std::stoi(column(line, scale_col));
+        int8_t scale;
+        if (column(line, scale_col) == "") {
+            scale = 1;
+        } 
+        else {
+            scale = std::stoi(column(line, scale_col));
+        }
+
         try {
             scales.at(scale)++;
         }
@@ -125,7 +133,13 @@ std::vector<float> extract_mesh_distances(const std::string& filename)
     distances.reserve(num_faces);
     for (std::string line; num_faces > 0 && std::getline(f, line); num_faces--) {
         const int dist_col = std::stoi(column(line, 0)) + property_idx;
-        const float dist = std::stoi(column(line, dist_col));
+        float dist;
+        if (column(line, dist_col) == "") {
+            dist = 1.0;
+        }
+        else {
+            dist = std::stoi(column(line, dist_col));
+        }
         distances.push_back(dist);
     }
     return distances;
