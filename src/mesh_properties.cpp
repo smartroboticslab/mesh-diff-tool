@@ -78,7 +78,7 @@ std::map<int8_t, int> extract_mesh_scales(const std::string& filename)
         const int scale_col = std::stoi(column(line, 0)) + property_scale_idx;
         int8_t scale;
         if (column(line, scale_col) == "") {
-            scale = 1;
+            scale = 0;
         }
         else {
             scale = std::stoi(column(line, scale_col));
@@ -134,7 +134,7 @@ std::vector<float> extract_mesh_distances(const std::string& filename)
         const int dist_col = std::stoi(column(line, 0)) + property_idx;
         float dist;
         if (column(line, dist_col) == "") {
-            dist = 1.0;
+            dist = 0.0f;
         }
         else {
             dist = std::stoi(column(line, dist_col));
