@@ -11,7 +11,6 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <iostream>
 
 bool begins_with(const std::string& s, const std::string& prefix)
 {
@@ -80,7 +79,7 @@ std::map<int8_t, int> extract_mesh_scales(const std::string& filename)
         int8_t scale;
         if (column(line, scale_col) == "") {
             scale = 1;
-        } 
+        }
         else {
             scale = std::stoi(column(line, scale_col));
         }
