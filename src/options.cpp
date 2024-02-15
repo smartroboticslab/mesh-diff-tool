@@ -9,15 +9,15 @@
 #include <options.hpp>
 
 static char doc_single[] =
-    "Try to match the PLY meshe SOURCE_MESH to TARGET_MESH. An error heatmap mesh will be created "
+    "Try to match the PLY mesh MESH to REFERENCE_MESH. An error heatmap mesh will be created "
     "and the accuracy and completness will be saved to a TSV file.";
-static char args_doc_single[] = "SOURCE_MESH TARGET_MESH";
+static char args_doc_single[] = "MESH REFERENCE_MESH";
 
 static char doc_multi[] =
-    "Try to match all PLY meshes in SOURCE_PATH to those in TARGET_PATH. "
+    "Try to match all PLY meshes in MESH_PATH to those in REFERENCE_MESH_PATH. "
     "An error heatmap mesh will be created for each match and the per-mesh accuracy and "
     "completness will be saved to a TSV file.";
-static char args_doc_multi[] = "SOURCE_PATH TARGET_PATH";
+static char args_doc_multi[] = "MESH_PATH REFERENCE_MESH_PATH";
 
 static struct argp_option program_options[] = {
     {"heatmap-dir",
@@ -29,7 +29,7 @@ static struct argp_option program_options[] = {
      't',
      "FILE",
      0,
-     "The file where the TSV output will be saved. Defaults to SOURCE_PATH/mesh_comparison.tsv"},
+     "The file where the TSV output will be saved. Defaults to MESH_PATH/mesh_comparison.tsv"},
     {"verbose",
      'v',
      0,
