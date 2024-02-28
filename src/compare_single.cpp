@@ -103,7 +103,7 @@ int main(int argc, char** argv)
     // Write the TSV data.
     {
         std::ofstream f(options.tsv_file);
-        f << "Source object\tTarget object\tAccuracy (m)\tCompleteness (%)\tDesired scale (%)\tMean observed dist (m)\tDesired observed dist (%)\n";
+        f << "Mesh\tReference mesh\tAccuracy (m)\tCompleteness (%)\tDesired scale (%)\tMean observed dist (m)\tDesired observed dist (%)\n";
         f << options.source_mesh_path.string() + "\t" + options.target_mesh_path.string() + "\t"
                 + std::to_string(accuracy) + "\t" + std::to_string(completeness) + "\t"
                 + std::to_string(pc_desired_scale) + "\t" + std::to_string(mean_dist) + "\t"
