@@ -76,7 +76,6 @@ int main(int argc, char** argv)
     const Options options = parse_options(argc, argv);
 
     // Hardcoded parameters. ToDo -> Consider adding these in the Options
-    const double inlierThreshold = 0.05;
     const double samplingDensity = 0.0; // number of points per m^2
     constexpr int desired_scale = 0;
     constexpr float desired_dist = 1.0f;
@@ -145,8 +144,9 @@ int main(int argc, char** argv)
         MeshDifference meshDifference(samplingDensity);
         meshDifference.setSourceMesh(sourceMeshData.mesh);
         meshDifference.setTargetMesh(targetMeshDataIt->mesh);
-        const float accuracy = meshDifference.computeDifference(inlierThreshold);
-        const float completeness = 100.0f * meshDifference.computeCompleteness(inlierThreshold);
+        const float accuracy = meshDifference.computeDifference(options.inlier_threshold);
+        const float completeness =
+            100.0f * meshDifference.computeCompleteness(options.inlier_threshold);
         const float pc_desired_scale = percentage_at_scale(
             extract_mesh_scales(sourceMeshData.filename.string()), desired_scale);
         const float mean_dist = mean(extract_mesh_distances(sourceMeshData.filename.string()));
@@ -169,12 +169,12 @@ int main(int argc, char** argv)
 
             // Save accuracy heatmap
             meshDifference.saveAccuracyHeatmap(
-                accuracyHeatmapFilename, 0.0, inlierThreshold, colormap);
+                accuracyHeatmapFilename, 0.0, options.inlier_threshold, colormap);
 
             // Save completeness heatmap
             meshDifference.saveCompletenessHeatmap(completenessHeatmapFilename,
                                                    0.0,
-                                                   inlierThreshold,
+                                                   options.inlier_threshold,
                                                    tinycolormap::GetColor(0.0, colormap),
                                                    tinycolormap::GetColor(1.0, colormap));
         }

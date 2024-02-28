@@ -14,6 +14,7 @@ struct Options {
     std::filesystem::path target_mesh_path;
     std::filesystem::path heatmap_dir;
     std::filesystem::path tsv_file;
+    double inlier_threshold = 0.05;
     int verbose = 0;
 };
 
